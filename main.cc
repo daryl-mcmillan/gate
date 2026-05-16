@@ -29,8 +29,11 @@ int main(void) {
   uint32_t val = 0;
   uint8_t sync = PINB & sync_pin;
   for( ;; ) {
-    uint32_t rateVal = adc_read(3);
-    rateVal = (rateVal + 8) << 12;
+    uint32_t rateVal = adc_read(3) + 512;
+    uint32_t exp = rateVal >> 8;
+    uint32_t steps = rateVal - ( exp << 8 );
+    uint32_t base = ( (1 << exp) - 1 ) << 8;
+    rateVal = ( base + ( steps << exp ) ) << 9;
     uint32_t dutyVal = adc_read(2);
     dutyVal = dutyVal << 22;
     val = val + rateVal;
