@@ -22,22 +22,19 @@ int main(void) {
 
   DIDR0 = ( 1 << ADC3D ) | ( 1 << ADC2D );
   DDRB = 0b00000100;
-  PORTB = 0b00000000;
+  PORTB = 0b00000001;
 
   uint8_t out_pin = 0b00000100;
   uint8_t sync_pin = 0b00000001;
   uint32_t val = 0;
   uint8_t sync = PINB & sync_pin;
   for( ;; ) {
-    uint32_t rateVal = adc_read(3) + 512;
-    uint32_t exp = rateVal >> 8;
-    uint32_t steps = rateVal - ( exp << 8 );
-    uint32_t base = ( (1 << exp) - 1 ) << 8;
-    rateVal = ( base + ( steps << exp ) ) << 9;
+    uint32_t rateVal = adc_read(3) + 32;
+    rateVal = rateVal << 13;
     uint32_t dutyVal = adc_read(2);
     dutyVal = dutyVal << 22;
     val = val + rateVal;
-    uint8_t syncVal = PINB & sync_pin;
+    uint8_t syncVal = ~PINB & sync_pin;
     if( syncVal == sync_pin && sync != sync_pin ) {
       val = 0;
     }
@@ -47,5 +44,6 @@ int main(void) {
     } else {
       PORTB &= ~out_pin;
     }
+    
   }
 }
